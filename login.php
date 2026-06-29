@@ -1,20 +1,19 @@
 <?php
 session_start();
-include "includes/db.php";
-include "includes/header.php";
-
+include "includes/db.php" ;
+include "includes/header.php" ;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $username = $_POST['username'];
     $password = $_POST['password'];
 
     $stmt = $conn->prepare(
-        "SELECT id, username, role
-        FROM users
-        WHERE username = ? AND password = ?"
+        "SELECT id, username, password, role
+         FROM users
+         WHERE username = ?"
     );
 
-    $stmt->bind_param("ss", $username, $password);
+    $stmt->bind_param("s", $username);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -23,18 +22,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $user = $result->fetch_assoc();
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
+        if (password_verify($password, $user['password'])) {
 
-        header("Location: index.php");
-        exit();
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['role'];
 
-} else {
-    echo "Invalid username or password";
+            header("Location: index.php");
+            exit();
+
+        } else {
+            $error = "Invalid username or password";
+        }
+
+    } else {
+        $error = "Invalid username or password";
     }
 }
 ?>
+
 <div class="container mt-5">
 
     <div class="row justify-content-center">
@@ -46,8 +52,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card-body">
 
                     <h3 class="text-center mb-4"> Login </h3>
+                     <?php if (isset($error)): ?>
+                        <div class="alert alert-danger">
+                            <?= $error ?>
+                        </div>
+                    <?php endif; ?>
 
-                    <form method="POST">
+                    <form method="POST" action="authenticate.php">
 
                         <div class="mb-3">
                             <label class="form-label"> Username </label>
@@ -72,5 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
 </div>
+<a href="forgot_password.php">Forgot Password?</a>
 
 <?php include "includes/footer.php"; ?>

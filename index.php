@@ -1,6 +1,9 @@
-<?php include "authenticate.php"; ?>
-<?php include "includes/db.php"; ?>
-<?php include "includes/header.php"; ?>
+<?php
+
+ include "includes/auth.php"; 
+ include "includes/db.php"; 
+ include "includes/header.php"; 
+ ?>
 
 <div class="container">
 
